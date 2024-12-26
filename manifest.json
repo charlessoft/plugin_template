@@ -1,0 +1,71 @@
+{
+  "author": "foxit",
+  "copyright": "__MSG_extCopyright__",
+  "description": "starter plugin",
+  "icon": "test/res/panelicon_.png",
+  "id": "starter",
+  "manifest_version": 1,
+  "name": "starter",
+  "title": "js plugin demo",
+  "friendly_name": "js plugin",
+  "domain": "www.testplugin.com",
+  "panel":
+  {
+    "icon": "./img/modelTree.png",
+    "title": "__MSG_PanelTitle__",
+    "tooltip": "__MSG_PanelTip__",
+    "url": "./src/index.html"
+  },
+  "ribbon":
+  [
+    {
+      "customTab":
+      {
+        "groups":
+        [
+          {
+            "controls":
+            [
+              {
+                "control":
+                {
+                  "action":
+                  {
+                    "functionname": "showPanel",
+                    "type": "DoModelDialog",
+                    "url": "http://localhost:5173"
+                  },
+                  "enable": true,
+                  "icon": "./img/button_16.png;./img/button_32.png;",
+                  "id": "BtnConnectService",
+                  "title": "my btn",
+                  "description": "this is a button",
+                  "tooltip": "__MSG_ButtonTip__",
+                  "type": "Button"
+                }
+              }
+            ],
+            "id": "CustomGroup",
+            "label": "label"
+          }
+        ],
+        "id": "jsPlugin1"
+      }
+    }
+  ],
+  "signcode": "",
+  "version": "2.0.0",
+  "resources":
+  {
+    "en-US":
+    {
+      "extCopyright": "Custom copyright",
+      "extDescription": "Custom description",
+      "PanelTitle": "Custom title",
+      "PanelTip": "Custom panel tip",
+      "ControlActionTitle": "Custom action title",
+      "ButtonTitle": "Custom button title",
+      "ButtonTip": "Custom button tip"
+    }
+  }
+}
