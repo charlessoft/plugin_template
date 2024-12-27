@@ -1,74 +1,149 @@
 <script setup>
 
 import {onMounted, ref} from "vue";
-
-const title = ref('')
-
 import {
-  App as PluginApp
+  App as PluginApp, ColorSpace, ColorState, Doc, Page, PDFArray, PDFDictionary, PDFString, TextObject, TextState,
 } from "./lib/foxit.esm.min.js"
 
 
+const title = ref('')
+const msgLog = ref('message:<br />')
 
-let docEventCallbacks = new FR_DocEventCallbacks({
+
+const app = ref({})
+
+
+let docEventCallbacks = {
   "FRDocWillOpen": function (clientData,doc) {
-    console.log("FRDocWillOpen", clientData,doc);
+    console.log("onDocWillOpen", clientData,doc);
+    msgLog.value += 'receive: onDocWillOpen <br />'
   },
   "FRDocDidOpen": function (clientData,doc) {
-    console.log("OnDocDidOpen", doc);
+    console.log("onDocDidOpen", doc);
+    msgLog.value += 'receive: onDocDidOpen<br />'
   },
   "FRDocOnActivate": function (clientData,doc) {
-    console.log("OnDocActivate", doc);
+    console.log("onDocActivate", doc);
+    msgLog.value += 'receive: onDocActivate<br />'
   },
   "FRDocOnDeactivate": function (clientData,doc) {
-    console.log("OnDocDeactivate", doc);
+    console.log("onDocDeactivate", doc);
   },
   "FRDocOnOtherDocActivated": function (clientData) {
-    console.log("OnOtherDocActivated", doc);
+    console.log("onOtherDocActivated", doc);
   },
   "FRDocOnOtherDocDeactivated": function (clientData) {
-    console.log("OnOtherDocDeactivated", doc);
+    console.log("onOtherDocDeactivated", doc);
   },
   "FRDocWillClose": function (clientData,doc) {
-    console.log("OnWillClose", doc);
+    console.log("onWillClose", doc);
   },
   "FRDocDidClose": function (clientData,doc) {
-    console.log("OnDidClose", doc);
+    console.log("onDidClose", doc);
   },
   "FRDocWillSave": function (clientData,doc,bSaveAs) {
-    console.log("OnWillSave", doc, bSaveAs);
+    console.log("onWillSave", doc, bSaveAs);
   },
   "FRDocDidSave": function (clientData,doc,bSaveAs) {
-    console.log("OnDidSave", doc, bSaveAs);
+    console.log("onDidSave", doc, bSaveAs);
   },
   "FRDocWillPrint": function (clientData,doc) {
-    console.log("OnWillPrint", doc);
+    console.log("onWillPrint", doc);
   },
   "FRDocDidPrint": function (clientData,doc) {
-    console.log("OnDidPrint", doc);
+    console.log("onDidPrint", doc);
   },
   "FRDocOnAnnotSelectionChanged": function (clientData) {
-    console.log("OnAnnotSelectionChanged", doc);
+    console.log("onAnnotSelectionChanged", doc);
   },
   "FRDocOnAnnotSetFocus": function (clientData,doc,focusAnnot) {
-    console.log("OnAnnotSetFocus", doc);
+    console.log("onAnnotSetFocus", doc);
   },
   "FRDocOnAnnotKillFocus": function (clientData,doc,focusAnnot) {
-    console.log("OnAnnotKillFocus", doc);
+    console.log("onAnnotKillFocus", doc);
   },
   "FRDocOnWillDShowFloatyBar": function (clientData,doc,bsCurToolhandleName,pAryBeShowBtnName) {
-    console.log("FRDocOnWillDShowFloatyBar", doc,bsCurToolhandleName,pAryBeShowBtnName);
+    console.log("onWillDShowFloatyBar", doc,bsCurToolhandleName,pAryBeShowBtnName);
   }
-});
-// const RegisterDocHandlerOfPDDoc = async() =>{
-//   let bRet = await app.RegisterDocHandlerOfPDDoc(docEventCallbacks);
-//   console.log('app.RegisterDocHandlerOfPDDoc', bRet);
-// };
+};
 
+
+const addText = async () => {
+  console.log('addText');
+  const doc = await Doc.create();
+  //create a new page
+  let pageDict = await doc.createPdfNewPage(0);
+  console.log('pageDict', pageDict)
+  if (pageDict === null) {
+    throw new Error('Create new page failed');
+  }
+  const pageRect ={
+    left: 0,
+    top: 0,
+    right: 612,
+    bottom: 792
+  }
+  //set media box of the page
+  await pageDict.setAtRect('MediaBox', pageRect);
+  //create text object
+  let textObj = await TextObject.create();
+  console.log('FPDTextObject.New', textObj);
+  //add specified font to the document
+  let font = await doc.addStandardFont('Times-Bold');
+  console.log('AddStandardFont', font);
+  if (font === null) {
+    throw new Error('Add font failed');
+  }
+  let typename = await font.getFontTypeName();
+  console.log('GetFontTypeName', typename);
+  //create text state, set font and font size
+  let textState = await TextState.create();
+  console.log('FPDTextState.New', textState);
+  if (textState === null) {
+    throw new Error('Create text state failed');
+  }
+  await textState.setFont(font);
+  await textState.setFontSize(25);
+  if (textObj === null) {
+    throw new Error('Create text object failed');
+  }
+  await textObj.setTextState(textState);
+
+  let colorState = await ColorState.create();
+  console.log('ColorState', colorState);
+  let _colorSpace = await ColorSpace.create();
+  const colorSpace = await _colorSpace.getStockCS(2);
+  if ( colorSpace === null ) {
+    throw new Error('Get stock color space failed');
+  }
+  await colorState.setFillColor(colorSpace, [255, 0, 0]);
+  await textObj.setColorState(colorState);
+  await textObj.setPosition(200, 400);
+  await textObj.setText('Hello, PDF WORLD');
+
+  let page = await Page.create();
+  console.log('FPDPage.New', page)
+  if (page === null) {
+    throw new Error('Create page failed');
+  }
+  await page.load({doc: doc, pageDict: pageDict, pageCache: true});
+  let pos = await page.getLastObjectPosition();
+  console.log('GetLastObjectPosition', pos);
+  // add text to page
+  if ( pos === null ) {
+    throw new Error('pos failed');
+  }
+  await page.insertObject(pos, textObj);
+  await page.generateContent();
+  var bRet = await doc.savePdf('./InsertText.pdf', 0, true);
+  console.log('doc.savePdf', bRet);
+  await page.destroy();
+  await app.value.openFromFile({'fileSrc': './InsertText.pdf'})
+}
 
 
 onMounted(async () => {
-  let pluginApp = await PluginApp.create({
+  app.value = await PluginApp.create({
     pluginInfo: {
       id: 'starter',
       name: 'starter',
@@ -78,24 +153,28 @@ onMounted(async () => {
       license: ''
     }
   })
-  title.value= await pluginApp.getAppTitle()
-  let bRet = await pluginApp.RegisterDocHandlerOfPDDoc(docEventCallbacks);
+
+  title.value= await app.value.getAppTitle()
+  let bRet = await app.value.registerDocHandlerOfPDDoc(docEventCallbacks);
   console.log(title.value);
 })
 </script>
 
 <template>
-  <div style="margin:0;padding:0">
-    {{title}}
-    <br />
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div style="margin: 50px; padding: 0; font-size: 20px; font-weight: bold;">
+    Welcome Js plugin SDK
   </div>
-  <HelloWorld msg="Vite + Vue" />
+<!--  <div>-->
+<!--    {{title}}-->
+<!--  </div>-->
+  <button class="text-button" title="Click to open a blank page and add an textObject" @click="addText()">
+    Add Text
+  </button>
+
+<hr />
+<div style="text-align: left;"  v-html=msgLog>
+</div>
+
 </template>
 
 <style scoped>
