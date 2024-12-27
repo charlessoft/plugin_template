@@ -69,10 +69,9 @@ let docEventCallbacks = {
 
 
 const addText = async () => {
-  console.log('addText');
-  const doc = await Doc.create();
-  //create a new page
-  let pageDict = await doc.createPdfNewPage(0);
+  const doc = await app.value.createBlankDoc(800,800)
+  let page = await doc.getPage(0)
+  let pageDict = await page.getDict()
   console.log('pageDict', pageDict)
   if (pageDict === null) {
     throw new Error('Create new page failed');
@@ -118,15 +117,9 @@ const addText = async () => {
   }
   await colorState.setFillColor(colorSpace, [255, 0, 0]);
   await textObj.setColorState(colorState);
-  await textObj.setPosition(200, 400);
+  await textObj.setPosition(300, 400);
   await textObj.setText('Hello, PDF WORLD');
 
-  let page = await Page.create();
-  console.log('FPDPage.New', page)
-  if (page === null) {
-    throw new Error('Create page failed');
-  }
-  await page.load({doc: doc, pageDict: pageDict, pageCache: true});
   let pos = await page.getLastObjectPosition();
   console.log('GetLastObjectPosition', pos);
   // add text to page
@@ -135,10 +128,6 @@ const addText = async () => {
   }
   await page.insertObject(pos, textObj);
   await page.generateContent();
-  var bRet = await doc.savePdf('./InsertText.pdf', 0, true);
-  console.log('doc.savePdf', bRet);
-  await page.destroy();
-  await app.value.openFromFile({'fileSrc': './InsertText.pdf'})
 }
 
 
@@ -161,7 +150,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div style="margin: 50px; padding: 0; font-size: 20px; font-weight: bold;">
+  <div style="margin: 50px; padding: 0; font-size: 16px; font-weight: bold;">
     Welcome Js plugin SDK
   </div>
 <!--  <div>-->
