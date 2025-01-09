@@ -151,13 +151,13 @@ onMounted(async () => {
 
 <template>
   <div style="margin: 50px; padding: 0; font-size: 16px; font-weight: bold;">
-    Welcome Js plugin SDK
+    Javascript Plug-in Demo
   </div>
 <!--  <div>-->
 <!--    {{title}}-->
 <!--  </div>-->
-  <button class="text-button" title="Click to open a blank page and add an textObject" @click="addText()">
-    Add Text
+  <button class="text-button" title="Click to create a blank page and add a text object." @click="addText()">
+    Hello World
   </button>
 
 <hr />
