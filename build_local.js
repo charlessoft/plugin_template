@@ -1,17 +1,43 @@
-// 修改后的代码
 import fs from 'fs';
 import path  from 'path';
 import archiver  from 'archiver';
 import { fileURLToPath } from 'url';
 
+
+// copy directory
+function copyDirectory(src, dest) {
+    if (!fs.existsSync(dest)) {
+        fs.mkdirSync(dest, { recursive: true });
+    }
+
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+
+    for (let entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+
+        if (entry.isDirectory()) {
+            copyDirectory(srcPath, destPath);
+        } else {
+            fs.copyFileSync(srcPath, destPath);
+        }
+    }
+}
+
 async function createZipFromManifest() {
     try {
-        // 读取 manifest.json 文件
+        // get manifest.json 
 
         // 获取当前模块的文件路径
         const __filename = fileURLToPath(import.meta.url);
         // 获取当前模块的目录路径
         const __dirname = path.dirname(__filename);
+
+        // copy img to dist
+        const imgSrcPath = path.join(__dirname, 'img');
+        const imgDestPath = path.join(__dirname, 'dist', 'img');
+        copyDirectory(imgSrcPath, imgDestPath);
+
 
         const manifestPath = path.join(__dirname, 'manifest.json');
 
