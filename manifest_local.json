@@ -1,0 +1,64 @@
+{
+  "author": "foxit",
+  "copyright": "Copyright © 2023-2024 Foxit Software Inc. All Rights Reserved.",
+  "description": "Javascript starter plugin demo",
+  "icon": "test/res/panelicon_.png",
+  "id": "starter",
+  "manifest_version": 1,
+  "name": "starter",
+  "title": "Javascript Plug-in Demo",
+  "friendly_name": "Javascript starter plugin",
+  "domain": "www.testplugin.com",
+  "ribbon":
+  [
+    {
+      "customTab":
+      {
+        "groups":
+        [
+          {
+            "controls":
+            [
+              {
+                "control":
+                {
+                  "action":
+                  {
+                    "functionname": "showPanel",
+                    "type": "DoModelDialog",
+                    "url": "./index.html"
+                  },
+                  "enable": true,
+                  "icon": "./img/button_16.png;./img/button_32.png;",
+                  "id": "BtnConnectService",
+                  "title": "Starter",
+                  "description": "this is a button",
+                  "tooltip": "Starter",
+                  "type": "Button"
+                }
+              }
+            ],
+            "id": "CustomGroup",
+            "label": "label"
+          }
+        ],
+        "id": "Starter"
+      }
+    }
+  ],
+  "signcode": "",
+  "version": "2.0.0",
+  "resources":
+  {
+    "en-US":
+    {
+      "extCopyright": "Custom copyright",
+      "extDescription": "Custom description",
+      "PanelTitle": "Custom title",
+      "PanelTip": "Custom panel tip",
+      "ControlActionTitle": "Custom action title",
+      "ButtonTitle": "Custom button title",
+      "ButtonTip": "Custom button tip"
+    }
+  }
+}
