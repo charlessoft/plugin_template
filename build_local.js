@@ -26,22 +26,30 @@ function copyDirectory(src, dest) {
 
 async function createZipFromManifest() {
     try {
-        // get manifest.json 
-
         // 获取当前模块的文件路径
         const __filename = fileURLToPath(import.meta.url);
         // 获取当前模块的目录路径
         const __dirname = path.dirname(__filename);
 
-        // copy img to dist
+        // Define paths
+        const manifestPath = path.join(__dirname, 'manifest.json');
+        const manifestLocalPath = path.join(__dirname, 'manifest_local.json');
+        const manifestBackupPath = path.join(__dirname, 'manifest_bak.json');
+
+        // Backup manifest.json
+        fs.copyFileSync(manifestPath, manifestBackupPath);
+        console.log('Backed up manifest.json to manifest_bak.json');
+
+        // Replace manifest.json with manifest_local.json
+        fs.copyFileSync(manifestLocalPath, manifestPath);
+        console.log('Replaced manifest.json with manifest_local.json');
+
+        // Copy img to dist
         const imgSrcPath = path.join(__dirname, 'img');
         const imgDestPath = path.join(__dirname, 'dist', 'img');
         copyDirectory(imgSrcPath, imgDestPath);
 
-
-        const manifestPath = path.join(__dirname, 'manifest.json');
-
-
+        // Read the manifest to get the id
         const manifestData = fs.readFileSync(manifestPath, 'utf8');
         const manifest = JSON.parse(manifestData);
 
@@ -50,7 +58,7 @@ async function createZipFromManifest() {
         if (!id) {
             throw new Error('manifest.json does not contain an id field');
         }
-        console.log(`plugin id:${id}`)
+        console.log(`plugin id: ${id}`);
 
         // 创建压缩文件名
         const outputFilePath = path.join(__dirname, `${id}.zip`);
@@ -88,6 +96,10 @@ async function createZipFromManifest() {
         // 完成压缩
         await archive.finalize();
         console.log(`Created zip file: ${outputFilePath}`);
+
+        // Restore the original manifest.json
+        fs.copyFileSync(manifestBackupPath, manifestPath);
+        console.log('Restored original manifest.json from manifest_bak.json');
     } catch (error) {
         console.error('Error creating zip file:', error);
     }
