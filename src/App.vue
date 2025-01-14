@@ -117,7 +117,7 @@ const addText = async () => {
   }
   await colorState.setFillColor(colorSpace, [255, 0, 0]);
   await textObj.setColorState(colorState);
-  await textObj.setPosition(300, 400);
+  await textObj.setPosition(200, 400);
   await textObj.setText('Hello, PDF WORLD');
 
   let pos = await page.getLastObjectPosition();
@@ -128,6 +128,7 @@ const addText = async () => {
   }
   await page.insertObject(pos, textObj);
   await page.generateContent();
+  await doc.reloadPage();
 }
 
 
